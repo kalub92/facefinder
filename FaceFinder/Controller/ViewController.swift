@@ -12,7 +12,6 @@ import Vision
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     @IBOutlet weak var indicatorLabel: UILabel!
     
@@ -45,6 +44,24 @@ class ViewController: UIViewController {
             self.performVisionRequest(image: cgImage, withScaledHeight: scaledHeight)
         }
     }
+    
+    func createFaceOutline(withRectangle rectangle: CGRect) {
+        let yellowView = UIView()
+        yellowView.backgroundColor = .clear
+        yellowView.layer.borderColor = UIColor.yellow.cgColor
+        yellowView.layer.borderWidth = 3
+        yellowView.layer.cornerRadius = 5
+        yellowView.alpha = 0.0
+        yellowView.frame = rectangle
+        self.view.addSubview(yellowView)
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            yellowView.alpha = 0.75
+            self.spinner.alpha = 0.0
+            self.indicatorLabel.alpha = 0.0
+        })
+
+    }
 
     // MARK: Vision Request
     func performVisionRequest(image: CGImage, withScaledHeight scaledHeight: CGFloat) {
@@ -64,20 +81,8 @@ class ViewController: UIViewController {
                     let x = self.view.frame.width * faceObservation.boundingBox.origin.x
                     let y = scaledHeight * (1 - faceObservation.boundingBox.origin.y) - height
                     
-                    let yellowView = UIView()
-                    yellowView.backgroundColor = .clear
-                    yellowView.layer.borderColor = UIColor.yellow.cgColor
-                    yellowView.layer.borderWidth = 3
-                    yellowView.layer.cornerRadius = 5
-                    yellowView.alpha = 0.0
-                    yellowView.frame = CGRect(x: x, y: y, width: width, height: height)
-                    self.view.addSubview(yellowView)
-                    
-                    UIView.animate(withDuration: 0.3, animations: {
-                        yellowView.alpha = 0.75
-                        self.spinner.alpha = 0.0
-                        self.indicatorLabel.alpha = 0.0
-                    })
+                    let outlineRect = CGRect(x: x, y: y, width: width, height: height)
+                    self.createFaceOutline(withRectangle: outlineRect)
                     
                     self.spinner.stopAnimating()
                 }
